@@ -1,0 +1,39 @@
+- name: Настройка веб-сервера Nginx
+  hosts: webservers 
+  become: yes       
+
+  tasks:
+    - name: 1. Обновление системных пакетов
+      ansible.builtin.apt:
+        update_cache: yes
+        upgrade: dist
+        cache_valid_time: 3600 
+
+    - name: 2. Установка Nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+      notify:
+        - Запуск и включение Nginx
+
+    - name: 3. Изменение стандартной страницы Nginx
+      ansible.builtin.copy:
+        src: index.html
+        dest: /var/www/html/index.nginx-debian.html 
+        owner: www-data
+        group: www-data
+        mode: '0644'
+      notify:
+        - Перезапуск Nginx
+
+  handlers:
+    - name: Запуск и включение Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Перезапуск Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
