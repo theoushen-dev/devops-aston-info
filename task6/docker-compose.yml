@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  backend:
+    container_name: kanban_backend
+    build:
+      context: ./kanban-backend
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+
+  frontend_one:
+    build:
+      context: ./kanban-frontend
+    restart: unless-stopped
+
+  frontend_two:
+    build:
+      context: ./kanban-frontend
+    restart: unless-stopped
+
+  balancer:
+    image: nginx:alpine
+    container_name: kanban_balancer
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend_one
+      - frontend_two
+    restart: unless-stopped
